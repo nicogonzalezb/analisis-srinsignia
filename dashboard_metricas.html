@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Bot Sr. Insignia | Q4 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --accent-gold: #d4af37;
+            --accent-gold-dim: #b8962e;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border-color: #27272a;
+            --gradient-gold: linear-gradient(135deg, #d4af37 0%, #f5d77a 50%, #d4af37 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .period-badge {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            border-color: var(--accent-gold-dim);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-accent, var(--accent-gold));
+        }
+
+        .kpi-card.emerald::before { background: var(--accent-emerald); }
+        .kpi-card.blue::before { background: var(--accent-blue); }
+        .kpi-card.purple::before { background: var(--accent-purple); }
+        .kpi-card.rose::before { background: var(--accent-rose); }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .kpi-value {
+            font-size: 2.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-emerald);
+        }
+
+        .kpi-change.negative {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--accent-rose);
+        }
+
+        .kpi-context {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 3rem 0 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border-color) 0%, transparent 100%);
+        }
+
+        /* Data Tables */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-title {
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .positive {
+            color: var(--accent-emerald);
+        }
+
+        .negative {
+            color: var(--accent-rose);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-title span {
+            font-size: 1.25rem;
+        }
+
+        /* Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 32px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--bg-primary);
+            animation: barGrow 1s ease-out forwards;
+            transform-origin: left;
+        }
+
+        @keyframes barGrow {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+
+        .bar-fill.gold { background: var(--gradient-gold); }
+        .bar-fill.emerald { background: linear-gradient(90deg, #059669, #10b981); }
+        .bar-fill.blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+
+        .bar-value {
+            width: 100px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        /* Time Comparison */
+        .time-comparison {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2rem 1rem;
+        }
+
+        .time-block {
+            text-align: center;
+        }
+
+        .time-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .time-value.before {
+            color: var(--accent-rose);
+        }
+
+        .time-value.after {
+            color: var(--accent-emerald);
+        }
+
+        .time-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .time-arrow {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .improvement-badge {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+        }
+
+        .improvement-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-emerald);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .improvement-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Achievements */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement:hover {
+            border-color: var(--accent-gold-dim);
+            background: var(--bg-card-hover);
+        }
+
+        .achievement-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            font-size: 1.5rem;
+        }
+
+        .achievement-content {
+            flex: 1;
+        }
+
+        .achievement-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-gold);
+        }
+
+        .achievement-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Conclusions */
+        .conclusions {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .conclusions h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .conclusion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .conclusion-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        .conclusion-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .conclusion-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .conclusion-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .kpi-value {
+                font-size: 2rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .time-comparison {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .time-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">Sr. Insignia</div>
+            <h1>Dashboard de Métricas</h1>
+            <p class="subtitle">Análisis de Impacto del Bot de Atención</p>
+            <div class="period-badge">📅 Octubre - Diciembre 2025</div>
+        </header>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Mensajes Q4</div>
+                <div class="kpi-value">36,972</div>
+                <div class="kpi-change">↑ 82% vs Oct</div>
+                <div class="kpi-context">Alto volumen automatizado</div>
+            </div>
+            
+            <div class="kpi-card emerald">
+                <div class="kpi-label">Total Leads Generados</div>
+                <div class="kpi-value">4,271</div>
+                <div class="kpi-change">↑ 159% crecimiento</div>
+                <div class="kpi-context">Pipeline comercial robusto</div>
+            </div>
+            
+            <div class="kpi-card purple">
+                <div class="kpi-label">Reducción Tiempo Respuesta</div>
+                <div class="kpi-value">-94%</div>
+                <div class="kpi-change">5min → 18s</div>
+                <div class="kpi-context">16.6x más rápido</div>
+            </div>
+        </div>
+
+        <!-- Mensajes Entrantes -->
+        <div class="section-header">
+            <h2>📊 Mensajes Entrantes</h2>
+        </div>
+
+        <div class="table-container">
+            <div class="table-title">Evolución Mensual de Mensajes</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Total Mensajes</th>
+                        <th>WhatsApp Lite</th>
+                        <th>Chats</th>
+                        <th>Variación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Octubre 2025</td>
+                        <td class="highlight">8,757</td>
+                        <td>8,574</td>
+                        <td>183</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Noviembre 2025</td>
+                        <td class="highlight">12,274</td>
+                        <td>11,971</td>
+                        <td>303</td>
+                        <td class="positive">+40.2%</td>
+                    </tr>
+                    <tr>
+                        <td>Diciembre 2025*</td>
+                        <td class="highlight">15,941</td>
+                        <td>15,724</td>
+                        <td>217</td>
+                        <td class="positive">+29.9%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Leads Creados -->
+        <div class="section-header">
+            <h2>🎯 Leads Creados</h2>
+        </div>
+
+        <div class="table-container">
+            <div class="table-title">Evolución Mensual de Leads</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Leads Creados</th>
+                        <th>Variación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Octubre 2025</td>
+                        <td class="highlight">716</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Noviembre 2025</td>
+                        <td class="highlight">1,701</td>
+                        <td class="positive">+137.6% (+985)</td>
+                    </tr>
+                    <tr>
+                        <td>Diciembre 2025</td>
+                        <td class="highlight">1,854</td>
+                        <td class="positive">+9.0% (+153)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title"><span>📈</span> Mensajes por Mes</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <div class="bar-label">Oct</div>
+                        <div class="bar-container">
+                            <div class="bar-fill gold" style="width: 55%;">8,757</div>
+                        </div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label">Nov</div>
+                        <div class="bar-container">
+                            <div class="bar-fill gold" style="width: 77%;">12,274</div>
+                        </div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label">Dic</div>
+                        <div class="bar-container">
+                            <div class="bar-fill gold" style="width: 100%;">15,941</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"><span>🎯</span> Leads por Mes</div>
+                <div class="bar-chart">
+                    <div class="bar-row">
+                        <div class="bar-label">Oct</div>
+                        <div class="bar-container">
+                            <div class="bar-fill emerald" style="width: 39%;">716</div>
+                        </div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label">Nov</div>
+                        <div class="bar-container">
+                            <div class="bar-fill emerald" style="width: 92%;">1,701</div>
+                        </div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-label">Dic</div>
+                        <div class="bar-container">
+                            <div class="bar-fill emerald" style="width: 100%;">1,854</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"><span>⚡</span> Tiempo de Respuesta</div>
+                <div class="time-comparison">
+                    <div class="time-block">
+                        <div class="time-value before">5 min</div>
+                        <div class="time-label">Noviembre (antes)</div>
+                    </div>
+                    <div class="time-arrow">→</div>
+                    <div class="time-block">
+                        <div class="time-value after">18s</div>
+                        <div class="time-label">Diciembre (con bot)</div>
+                    </div>
+                </div>
+                <div class="improvement-badge">
+                    <div class="improvement-value">16.6x más rápido</div>
+                    <div class="improvement-text">Reducción del 94% en tiempo de espera</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logros -->
+        <div class="section-header">
+            <h2>🏆 Logros Clave (Q4 2025)</h2>
+        </div>
+
+        <div class="achievements-grid">
+            <div class="achievement">
+                <div class="achievement-icon">📨</div>
+                <div class="achievement-content">
+                    <div class="achievement-value">36,972</div>
+                    <div class="achievement-label">Mensajes procesados</div>
+                </div>
+            </div>
+            <div class="achievement">
+                <div class="achievement-icon">👥</div>
+                <div class="achievement-content">
+                    <div class="achievement-value">4,271</div>
+                    <div class="achievement-label">Leads generados</div>
+                </div>
+            </div>
+            <div class="achievement">
+                <div class="achievement-icon">🚀</div>
+                <div class="achievement-content">
+                    <div class="achievement-value">+159%</div>
+                    <div class="achievement-label">Crecimiento de leads</div>
+                </div>
+            </div>
+            <div class="achievement">
+                <div class="achievement-icon">⚡</div>
+                <div class="achievement-content">
+                    <div class="achievement-value">-94%</div>
+                    <div class="achievement-label">Reducción tiempo respuesta</div>
+                </div>
+            </div>
+            <div class="achievement">
+                <div class="achievement-icon">📱</div>
+                <div class="achievement-content">
+                    <div class="achievement-value">98%+</div>
+                    <div class="achievement-label">Tráfico vía WhatsApp</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusiones -->
+        <div class="conclusions">
+            <h3>💡 Conclusiones</h3>
+            <div class="conclusion-list">
+                <div class="conclusion-item">
+                    <div class="conclusion-number">01</div>
+                    <div class="conclusion-text">
+                        <strong>Impacto comprobado:</strong> El bot ha demostrado un impacto significativo en la generación de leads, pasando de 716 a 1,854 mensuales (+159%).
+                    </div>
+                </div>
+                <div class="conclusion-item">
+                    <div class="conclusion-number">02</div>
+                    <div class="conclusion-text">
+                        <strong>Velocidad transformadora:</strong> El tiempo de respuesta pasó de 5 minutos a 18 segundos (-94%), mejorando drásticamente la experiencia del cliente.
+                    </div>
+                </div>
+                <div class="conclusion-item">
+                    <div class="conclusion-number">03</div>
+                    <div class="conclusion-text">
+                        <strong>Escalabilidad:</strong> El sistema ha manejado un crecimiento del 82% en volumen de mensajes manteniendo la calidad del servicio.
+                    </div>
+                </div>
+                <div class="conclusion-item">
+                    <div class="conclusion-number">04</div>
+                    <div class="conclusion-text">
+                        <strong>ROI demostrado:</strong> Más leads, más rápido = impacto directo en el pipeline comercial.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Última actualización: 26 de diciembre de 2025</p>
+            <p style="margin-top: 0.5rem; color: var(--accent-gold);">Sr. Insignia · Herreros Contemporáneos</p>
+        </footer>
+    </div>
+</body>
+</html>
+
